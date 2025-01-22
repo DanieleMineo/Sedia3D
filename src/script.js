@@ -106,7 +106,7 @@ const modelRotation = {
 
 //Load Sedia
 gltfLoader.load(
-    '/pointhouse/models/sedia/sedia-beba-curvy.glb',
+    '/models/sedia/sedia-beba-curvy.glb',
     (gltf) => {
         gltf.scene.traverse((node) => {
             if (node.isMesh) {
