@@ -19,7 +19,7 @@ const scene = new THREE.Scene()
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+const ambientLight = new THREE.AmbientLight(0xffffff, 2)
 scene.add(ambientLight)
 
 const directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
@@ -32,8 +32,8 @@ directionalLight.shadow.camera.right = 10;
 directionalLight.shadow.camera.top = 10;
 directionalLight.shadow.camera.bottom = -10;
 //Set up shadow properties for the directionalLight
-directionalLight.shadow.mapSize.width = 1024; // default 512
-directionalLight.shadow.mapSize.height = 1024; // default 512
+directionalLight.shadow.mapSize.width = 4096; // default 512
+directionalLight.shadow.mapSize.height = 4096; // default 512
 directionalLight.shadow.camera.near = 0.5; // default
 directionalLight.shadow.camera.far = 50; // default
 
@@ -111,7 +111,7 @@ gltfLoader.load(
         gltf.scene.traverse((node) => {
             if (node.isMesh) {
                 // console.log(node);
-                
+
                 // Controllo UV
                 if (!node.geometry.attributes.uv) {
                     // console.warn(`Il nodo "${node.name}" non ha coordinate UV!`);
@@ -146,11 +146,11 @@ gltfLoader.load(
                     node.material.aoMap.offset.set(.5, .5);
 
                     node.castShadow = true; // L'oggetto proietta ombre
-                    node.receiveShadow = true; // L'oggetto riceve ombre
+                    node.receiveShadow = false; // L'oggetto riceve ombre
 
                 } else if (node.name === 'BEBA_Curvy_Pavimento') {
 
-                    // node.visible = false;
+                    node.visible = false;
 
                     node.material.aoMap = texturePavimento.ao;
                     node.material.aoMap.repeat.set(1, 1); // Assicurati che la scala sia corretta
@@ -176,6 +176,21 @@ gltfLoader.load(
 
 		scene.add( gltf.scene );
 
+
+        // Calcola il bounding box del modello
+        const boundingBox = new THREE.Box3().setFromObject(gltf.scene);
+        const size = boundingBox.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+
+        // Imposta i limiti di zoom della camera
+        const minZoom = maxDim * 0.33; // Distanza minima di zoom
+        const maxZoom = maxDim * 2; // Distanza massima di zoom
+
+        // Aggiungi un controllo di zoom
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.minDistance = minZoom;
+        controls.maxDistance = maxZoom;
+
         // Aggiungi un controllo GUI per la rotazione del modello
         const modelFolder = gui.addFolder('Model Rotation');
         modelFolder.add(modelRotation, 'y', -Math.PI, Math.PI, 0.01).name('Rotation Y');
@@ -198,17 +213,17 @@ gltfLoader.load(
 /**
  * Floor
  */
-// const floor = new THREE.Mesh(
-//     new THREE.PlaneGeometry(30, 30),
-//     new THREE.MeshStandardMaterial({
-//         color: '#ededed',
-//         metalness: 0,
-//         roughness: 0.5
-//     })
-// )
-// floor.receiveShadow = true
-// floor.rotation.x = - Math.PI * 0.5
-// scene.add(floor)
+const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(3000, 3000),
+    new THREE.MeshStandardMaterial({
+        color: '#ffffff',
+        metalness: 0,
+        roughness: 1
+    })
+)
+floor.receiveShadow = true
+floor.rotation.x = - Math.PI * 0.5
+scene.add(floor)
 
 /**
  * Sizes
@@ -253,7 +268,7 @@ controls.enableDamping = true
 
 // Variabile per il colore di sfondo
 const backgroundColor = {
-    color: 0x000000 
+    color: 0xededed
 }
 
 
@@ -275,6 +290,11 @@ backgroundFolder.addColor(backgroundColor, 'color').name('Color').onChange((valu
     renderer.setClearColor(value);
 });
 backgroundFolder.open();
+
+/**
+ * Fog
+ */
+scene.fog = new THREE.Fog('#ededed', 10, 50)
 
 /**
  * Animate
@@ -299,3 +319,12 @@ const tick = () =>
 }
 
 tick()
+
+/**
+ * TODO
+ *
+ * - Camera che non vada sotto il piano
+ * - Ambient Ligth per ombre tropo scure su modello
+ * - Centratura verticale e orizzontale della orbit camera sul centro dell'oggetto
+ * - Gestione max/min Zoom
+ */
