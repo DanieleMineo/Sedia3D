@@ -104,6 +104,8 @@ const modelRotation = {
     y: 0
 };
 
+let controls;
+
 //Load Sedia
 gltfLoader.load(
     '/models/sedia/sedia-beba-curvy.glb',
@@ -171,25 +173,31 @@ gltfLoader.load(
                 node.material.needsUpdate = true; // Aggiorna il materiale
             }
         });
+
         // Ridimensiona il modello
         gltf.scene.scale.set(0.5, 0.5, 0.5); // Ridimensiona il modello a metà della dimensione originale
-
 		scene.add( gltf.scene );
-
 
         // Calcola il bounding box del modello
         const boundingBox = new THREE.Box3().setFromObject(gltf.scene);
         const size = boundingBox.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
+        const center = boundingBox.getCenter(new THREE.Vector3());
+        console.log(size)
 
         // Imposta i limiti di zoom della camera
-        const minZoom = maxDim * 0.33; // Distanza minima di zoom
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const minZoom = maxDim * 0.15; // Distanza minima di zoom
         const maxZoom = maxDim * 2; // Distanza massima di zoom
 
-        // Aggiungi un controllo di zoom
-        const controls = new OrbitControls(camera, renderer.domElement);
+        //Controls
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.target.set(center.x, center.y, center.z);
         controls.minDistance = minZoom;
         controls.maxDistance = maxZoom;
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2;
+        controls.update();
+    
 
         // Aggiungi un controllo GUI per la rotazione del modello
         const modelFolder = gui.addFolder('Model Rotation');
@@ -257,11 +265,6 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 
 camera.position.set(10, 10, 10)
 scene.add(camera)
 
-// Controls
-const controls = new OrbitControls(camera, canvas)
-controls.target.set(0, 0.75, 0)
-controls.enableDamping = true
-
 /**
  * Renderer
  */
@@ -309,7 +312,10 @@ const tick = () =>
     previousTime = elapsedTime
 
     // Update controls
-    controls.update()
+    if (controls) {
+        controls.update();
+    }
+
 
     // Render
     renderer.render(scene, camera)
