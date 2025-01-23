@@ -108,11 +108,11 @@ let controls;
 
 //Load Sedia
 gltfLoader.load(
-    '/models/sedia/sedia-beba-curvy.glb',
+    '/models/sedia/sedia-beba-curvy-2.glb',
     (gltf) => {
         gltf.scene.traverse((node) => {
             if (node.isMesh) {
-                // console.log(node);
+                console.log(node);
 
                 // Controllo UV
                 if (!node.geometry.attributes.uv) {
@@ -122,17 +122,49 @@ gltfLoader.load(
                     // console.log(`Il nodo "${node.name}" ha coordinate UV.`);
                 }
 
-                if (node.name === 'BEBA_Curvy_Imbottito') {
-                    node.material.map = textureImbottito.map;
+                if (node.name === 'BEBA_Curvy_Imbottito_Schienale') {
+                    node.material.map = textureSchienale.map;
+                    node.material.normalMap = textureSchienale.normal;
+                    node.material.roughnessMap = textureSchienale.roughness;
+
                     node.material.map.wrapS = THREE.RepeatWrapping;
                     node.material.map.wrapT = THREE.RepeatWrapping;
                     node.material.map.repeat.set(10, 10); // Assicurati che la scala sia corretta
                     node.material.map.offset.set(10, 10);
 
+                    node.material.normalMap.wrapS = THREE.RepeatWrapping;
+                    node.material.normalMap.wrapT = THREE.RepeatWrapping;
+                    node.material.normalMap.repeat.set(10, 10); // Assicurati che la scala sia corretta
+                    node.material.normalMap.offset.set(10, 10);
+
                     node.material.aoMap = textureImbottito.ao;
-                    node.material.aoMap.wrapS = THREE.RepeatWrapping;
-                    node.material.aoMap.wrapT = THREE.RepeatWrapping;
-                    node.material.aoMap.repeat.set(.5, .5); // Assicurati che la scala sia corretta
+                    // node.material.aoMap.wrapS = THREE.RepeatWrapping;
+                    // node.material.aoMap.wrapT = THREE.RepeatWrapping;
+                    node.material.aoMap.repeat.set(.5, .5);
+                    node.material.aoMap.offset.set(.5, .5);
+
+                    node.castShadow = true; // L'oggetto proietta ombre
+                    node.receiveShadow = false; // L'oggetto riceve ombre
+
+                } else if (node.name === 'BEBA_Curvy_Imbottito_Seduta') {
+                    node.material.map = textureSeduta.map;
+                    node.material.normalMap = textureSeduta.normal;
+                    node.material.roughnessMap = textureSeduta.roughness;
+
+                    node.material.map.wrapS = THREE.RepeatWrapping;
+                    node.material.map.wrapT = THREE.RepeatWrapping;
+                    node.material.map.repeat.set(10, 10); // Assicurati che la scala sia corretta
+                    node.material.map.offset.set(10, 10);
+
+                    node.material.normalMap.wrapS = THREE.RepeatWrapping;
+                    node.material.normalMap.wrapT = THREE.RepeatWrapping;
+                    node.material.normalMap.repeat.set(10, 10); // Assicurati che la scala sia corretta
+                    node.material.normalMap.offset.set(10, 10);
+
+                    node.material.aoMap = textureImbottito.ao;
+                    // node.material.aoMap.wrapS = THREE.RepeatWrapping;
+                    // node.material.aoMap.wrapT = THREE.RepeatWrapping;
+                    node.material.aoMap.repeat.set(.5, .5);
                     node.material.aoMap.offset.set(.5, .5);
 
                     node.castShadow = true; // L'oggetto proietta ombre
@@ -141,19 +173,17 @@ gltfLoader.load(
                 } else if (node.name === 'BEBA_Curvy_Struttura') {
                     node.material.map = textureStruttura.map;
                     node.material.aoMap = textureStruttura.ao;
-                    node.material.aoMap = textureImbottito.ao;
-                    node.material.aoMap.wrapS = THREE.RepeatWrapping;
-                    node.material.aoMap.wrapT = THREE.RepeatWrapping;
-                    node.material.aoMap.repeat.set(.5, .5); // Assicurati che la scala sia corretta
-                    node.material.aoMap.offset.set(.5, .5);
+                    node.material.aoMap.repeat.set(1, 1); // Assicurati che la scala sia corretta
+                    node.material.aoMap.offset.set(1, 1);
 
                     node.castShadow = true; // L'oggetto proietta ombre
                     node.receiveShadow = false; // L'oggetto riceve ombre
 
                 } else if (node.name === 'BEBA_Curvy_Pavimento') {
 
-                    node.visible = false;
-
+                    // node.visible = false;
+                    node.material.color = new THREE.Color(0xffffff); // Imposta il colore del pavimento
+                    node.material.roughness = 1;
                     node.material.aoMap = texturePavimento.ao;
                     node.material.aoMap.repeat.set(1, 1); // Assicurati che la scala sia corretta
                     node.material.aoMap.offset.set(1, 1);
@@ -175,19 +205,18 @@ gltfLoader.load(
         });
 
         // Ridimensiona il modello
-        gltf.scene.scale.set(0.5, 0.5, 0.5); // Ridimensiona il modello a metà della dimensione originale
 		scene.add( gltf.scene );
 
         // Calcola il bounding box del modello
         const boundingBox = new THREE.Box3().setFromObject(gltf.scene);
         const size = boundingBox.getSize(new THREE.Vector3());
         const center = boundingBox.getCenter(new THREE.Vector3());
-        console.log(size)
+        // console.log(size)
 
         // Imposta i limiti di zoom della camera
         const maxDim = Math.max(size.x, size.y, size.z);
-        const minZoom = maxDim * 0.15; // Distanza minima di zoom
-        const maxZoom = maxDim * 1; // Distanza massima di zoom
+        const minZoom = maxDim * 0.3; // Distanza minima di zoom
+        const maxZoom = maxDim * .7; // Distanza massima di zoom
 
         //Controls
         controls = new OrbitControls(camera, renderer.domElement);
@@ -231,6 +260,7 @@ const floor = new THREE.Mesh(
 )
 floor.receiveShadow = true
 floor.rotation.x = - Math.PI * 0.5
+floor.position.y = 0.01
 scene.add(floor)
 
 /**
