@@ -112,7 +112,7 @@ gltfLoader.load(
     (gltf) => {
         gltf.scene.traverse((node) => {
             if (node.isMesh) {
-                console.log(node);
+                // console.log(node);
 
                 // Controllo UV
                 if (!node.geometry.attributes.uv) {
