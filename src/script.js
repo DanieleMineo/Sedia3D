@@ -271,7 +271,7 @@ scene.add(camera)
 
 // Variabile per il colore di sfondo
 const backgroundColor = {
-    color: 0xededed
+    color: 0x000000
 }
 
 
