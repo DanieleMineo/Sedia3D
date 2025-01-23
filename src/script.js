@@ -187,7 +187,7 @@ gltfLoader.load(
         // Imposta i limiti di zoom della camera
         const maxDim = Math.max(size.x, size.y, size.z);
         const minZoom = maxDim * 0.15; // Distanza minima di zoom
-        const maxZoom = maxDim * 2; // Distanza massima di zoom
+        const maxZoom = maxDim * 1; // Distanza massima di zoom
 
         //Controls
         controls = new OrbitControls(camera, renderer.domElement);
